@@ -1,0 +1,17 @@
+#version 450
+// ReLU activation: output[i] = max(0, input[i])
+
+layout(local_size_x = 64) in;
+
+layout(set = 0, binding = 0) readonly  buffer InputBuf  { float data[]; } inBuf;
+layout(set = 0, binding = 1) writeonly buffer OutputBuf { float data[]; } outBuf;
+
+layout(push_constant) uniform PushConstants {
+    uint elementCount;
+} pc;
+
+void main() {
+    uint idx = gl_GlobalInvocationID.x;
+    if (idx >= pc.elementCount) return;
+    outBuf.data[idx] = max(0.0, inBuf.data[idx]);
+}

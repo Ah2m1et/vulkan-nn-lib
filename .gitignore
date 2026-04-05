@@ -1,0 +1,6 @@
+build/
+*.spv
+*.o
+models/*.bin
+.vscode/
+__pycache__/
