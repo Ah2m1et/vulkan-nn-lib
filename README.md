@@ -2,7 +2,7 @@
 
 Platform-bağımsız GPGPU kütüphanesi — Vulkan compute shader'ları ve ECS mimarisi ile yapay sinir ağı inference.
 
-**Öğrenciler:** Ahmet Korkmaz, Ahmet Talha Geçgelen
+**Öğrenciler:** Ahmet Korkmaz
 **Danışman:** Prof. Dr. Turgay Tugay Bilgin
 **Dönem:** 2025-2026 Bahar
 

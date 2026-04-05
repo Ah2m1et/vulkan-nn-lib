@@ -4,8 +4,8 @@
 
 | Alan | Bilgi |
 |------|-------|
-| **Öğrenci Adı Soyadı** | Ahmet Korkmaz, Ahmet Talha Geçgelen |
-| **Öğrenci No** | *(Numaranızı yazın)* |
+| **Öğrenci Adı Soyadı** | Ahmet Korkmaz |
+| **Öğrenci No** | 21360859072 |
 | **Proje Başlığı** | Yapay Sinir Ağları için Vulkan API ve Veri Temelli Programlama Tabanlı Platform Bağımsız GPGPU Kütüphanesi Geliştirilmesi |
 | **Danışman** | Prof. Dr. Turgay Tugay Bilgin |
 | **Dönem** | 2025-2026 Bahar |
