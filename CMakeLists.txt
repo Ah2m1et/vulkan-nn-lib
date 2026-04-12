@@ -64,6 +64,10 @@ add_executable(test_matmul tests/test_matmul.cpp)
 target_link_libraries(test_matmul PRIVATE vulkan_nn)
 add_test(NAME test_matmul COMMAND test_matmul)
 
+add_executable(test_buffer tests/test_buffer.cpp)
+target_link_libraries(test_buffer PRIVATE vulkan_nn)
+add_test(NAME test_buffer COMMAND test_buffer)
+
 # ------------------------------------------------------------
 # Benchmark
 # ------------------------------------------------------------

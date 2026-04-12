@@ -16,8 +16,8 @@
 
 | Hafta | Tarih Aralığı | Planlanan İş | Tahmini Tamamlanma (%) | Durum |
 |-------|---------------|--------------|------------------------|-------|
-| 1  | 07.04 - 13.04 | Proje dizini, GitHub reposu, geliştirme ortamı kurulumu, CMake yapılandırması | %10 | 🔄 Devam Ediyor |
-| 2  | 14.04 - 20.04 | Vulkan context kurulumu (VkInstance, VkDevice, compute queue), GPU buffer yönetimi | %20 | ⬜ Başlamadı |
+| 1  | 07.04 - 13.04 | Proje dizini, GitHub reposu, geliştirme ortamı kurulumu, CMake yapılandırması | %10 | ✅ Tamamlandı |
+| 2  | 14.04 - 20.04 | Vulkan context kurulumu (VkInstance, VkDevice, compute queue), GPU buffer yönetimi | %20 | 🔄 Devam Ediyor |
 | 3  | 21.04 - 27.04 | İlk compute shader (ReLU), SPIR-V derleme pipeline'ı, shader test altyapısı | %30 | ⬜ Başlamadı |
 | 4  | 28.04 - 04.05 | Tiled matrix multiplication (GEMM) shader, workgroup optimizasyonu | %42 | ⬜ Başlamadı |
 | 5  | 05.05 - 11.05 | CPU baseline implementasyonu, ilk CPU vs GPU benchmark ölçümleri | %54 | ⬜ Başlamadı |
@@ -32,6 +32,28 @@
 ---
 
 ## Haftalık İlerleme Kayıtları
+
+---
+
+### Hafta 2 *(Tarih: 14.04.2025 - 20.04.2025)*
+
+**Plandaki hedef:**
+- Vulkan context kurulumu (VkInstance, VkDevice, compute queue), GPU buffer yönetimi
+
+**Bu hafta yaptıklarım:**
+- `VkCommandPool` `VkContext`'e eklendi (hafta 3 compute dispatch için hazırlık)
+- `VkContext`: instance → physical device → logical device → compute queue → command pool akışı tamamlandı
+- `GpuBuffer`: host-visible + host-coherent bellek, `uploadData` / `downloadData` çalışır hale getirildi
+- `tests/test_buffer.cpp` yazıldı: float roundtrip, zero-fill ve command pool geçerlilik testleri
+
+**Plana göre durumum:**
+- Haftanın hedeflerine ulaşıldı
+
+**Karşılaştığım sorunlar / zorluklar:**
+- Yok
+
+**Gelecek hafta hedefim:**
+- İlk compute shader (ReLU) SPIR-V derleme pipeline'ı, shader dispatch altyapısı (descriptor set, pipeline layout, compute pipeline)
 
 ---
 

@@ -16,10 +16,11 @@
     } while (0)
 
 struct VkContext {
-    VkInstance       instance        = VK_NULL_HANDLE;
-    VkPhysicalDevice physDevice      = VK_NULL_HANDLE;
-    VkDevice         device          = VK_NULL_HANDLE;
-    VkQueue          computeQueue    = VK_NULL_HANDLE;
+    VkInstance       instance         = VK_NULL_HANDLE;
+    VkPhysicalDevice physDevice       = VK_NULL_HANDLE;
+    VkDevice         device           = VK_NULL_HANDLE;
+    VkQueue          computeQueue     = VK_NULL_HANDLE;
+    VkCommandPool    commandPool      = VK_NULL_HANDLE; // for compute dispatches
     uint32_t         computeFamilyIdx = UINT32_MAX;
 };
 

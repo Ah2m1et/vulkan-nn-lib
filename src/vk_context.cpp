@@ -61,11 +61,19 @@ VkContext createContext() {
 
     vkGetDeviceQueue(ctx.device, ctx.computeFamilyIdx, 0, &ctx.computeQueue);
 
+    // --- Command pool (reset-per-buffer, reused across dispatches) ---
+    VkCommandPoolCreateInfo poolCI{};
+    poolCI.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolCI.queueFamilyIndex = ctx.computeFamilyIdx;
+    poolCI.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    VK_CHECK(vkCreateCommandPool(ctx.device, &poolCI, nullptr, &ctx.commandPool));
+
     return ctx;
 }
 
 void destroyContext(VkContext& ctx) {
-    if (ctx.device   != VK_NULL_HANDLE) vkDestroyDevice(ctx.device, nullptr);
-    if (ctx.instance != VK_NULL_HANDLE) vkDestroyInstance(ctx.instance, nullptr);
+    if (ctx.commandPool != VK_NULL_HANDLE) vkDestroyCommandPool(ctx.device, ctx.commandPool, nullptr);
+    if (ctx.device      != VK_NULL_HANDLE) vkDestroyDevice(ctx.device, nullptr);
+    if (ctx.instance    != VK_NULL_HANDLE) vkDestroyInstance(ctx.instance, nullptr);
     ctx = VkContext{};
 }
