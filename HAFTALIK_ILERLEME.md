@@ -17,7 +17,7 @@
 | Hafta | Tarih Aralığı | Planlanan İş | Tahmini Tamamlanma (%) | Durum |
 |-------|---------------|--------------|------------------------|-------|
 | 1  | 07.04 - 13.04 | Proje dizini, GitHub reposu, geliştirme ortamı kurulumu, CMake yapılandırması | %10 | ✅ Tamamlandı |
-| 2  | 14.04 - 20.04 | Vulkan context kurulumu (VkInstance, VkDevice, compute queue), GPU buffer yönetimi | %20 | 🔄 Devam Ediyor |
+| 2  | 14.04 - 20.04 | Vulkan context kurulumu (VkInstance, VkDevice, compute queue), GPU buffer yönetimi | %20 | ✅ Tamamlandı |
 | 3  | 21.04 - 27.04 | İlk compute shader (ReLU), SPIR-V derleme pipeline'ı, shader test altyapısı | %30 | ⬜ Başlamadı |
 | 4  | 28.04 - 04.05 | Tiled matrix multiplication (GEMM) shader, workgroup optimizasyonu | %42 | ⬜ Başlamadı |
 | 5  | 05.05 - 11.05 | CPU baseline implementasyonu, ilk CPU vs GPU benchmark ölçümleri | %54 | ⬜ Başlamadı |
@@ -47,7 +47,7 @@
 - `tests/test_buffer.cpp` yazıldı: float roundtrip, zero-fill ve command pool geçerlilik testleri
 
 **Plana göre durumum:**
-- Haftanın hedeflerine ulaşıldı
+- Haftanın tüm hedeflerine ulaşıldı, hafta kapatıldı ✅
 
 **Karşılaştığım sorunlar / zorluklar:**
 - Yok
