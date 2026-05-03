@@ -18,20 +18,45 @@
 |-------|---------------|--------------|------------------------|-------|
 | 1  | 07.04 - 13.04 | Proje dizini, GitHub reposu, geliştirme ortamı kurulumu, CMake yapılandırması | %10 | ✅ Tamamlandı |
 | 2  | 14.04 - 20.04 | Vulkan context kurulumu (VkInstance, VkDevice, compute queue), GPU buffer yönetimi | %20 | ✅ Tamamlandı |
-| 3  | 21.04 - 27.04 | İlk compute shader (ReLU), SPIR-V derleme pipeline'ı, shader test altyapısı | %30 | ⬜ Başlamadı |
-| 4  | 28.04 - 04.05 | Tiled matrix multiplication (GEMM) shader, workgroup optimizasyonu | %42 | ⬜ Başlamadı |
-| 5  | 05.05 - 11.05 | CPU baseline implementasyonu, ilk CPU vs GPU benchmark ölçümleri | %54 | ⬜ Başlamadı |
-| 6  | 12.05 - 18.05 | ECS mimarisiyle katman yönetimi, VulkanMLP sınıfı iskelet kodu | %64 | ⬜ Başlamadı |
-| 7  | 19.05 - 25.05 | MNIST ağırlıklarını yükleme, 784→128→10 MLP inference pipeline | %75 | ⬜ Başlamadı |
-| 8  | 26.05 - 01.06 | Command buffer önceden kaydetme optimizasyonu, inference hız testleri | %84 | ⬜ Başlamadı |
-| 9  | 02.06 - 08.06 | Platform bağımsızlık testi (farklı Vulkan cihazda çalıştırma), benchmark tablosu | %92 | ⬜ Başlamadı |
-| 10 | 09.06 - 15.06 | Kod temizliği, dokümantasyon, final rapor, GitHub release | %100 | ⬜ Başlamadı |
+| 3  | 28.04 - 03.05 | İlk compute shader (ReLU), SPIR-V derleme pipeline'ı, shader test altyapısı | %30 | ✅ Tamamlandı |
+| 4  | 05.05 - 11.05 | Tiled matrix multiplication (GEMM) shader, workgroup optimizasyonu | %42 | ⬜ Başlamadı |
+| 5  | 12.05 - 18.05 | CPU baseline implementasyonu, ilk CPU vs GPU benchmark ölçümleri | %54 | ⬜ Başlamadı |
+| 6  | 19.05 - 25.05 | ECS mimarisiyle katman yönetimi, VulkanMLP sınıfı iskelet kodu | %64 | ⬜ Başlamadı |
+| 7  | 26.05 - 01.06 | MNIST ağırlıklarını yükleme, 784→128→10 MLP inference pipeline | %75 | ⬜ Başlamadı |
+| 8  | 02.06 - 08.06 | Command buffer önceden kaydetme optimizasyonu, inference hız testleri | %84 | ⬜ Başlamadı |
+| 9  | 09.06 - 15.06 | Platform bağımsızlık testi (farklı Vulkan cihazda çalıştırma), benchmark tablosu | %92 | ⬜ Başlamadı |
+| 10 | 16.06 - 22.06 | Kod temizliği, dokümantasyon, final rapor, GitHub release | %100 | ⬜ Başlamadı |
 
 **Durum simgeleri:** ⬜ Başlamadı | 🔄 Devam Ediyor | ✅ Tamamlandı | ⚠️ Gecikti
 
 ---
 
 ## Haftalık İlerleme Kayıtları
+
+---
+
+### Hafta 3 *(Tarih: 28.04.2025 - 03.05.2025)*
+
+**Plandaki hedef:**
+- İlk compute shader (ReLU), SPIR-V derleme pipeline'ı, shader test altyapısı
+
+**Bu hafta yaptıklarım:**
+- `src/vk_pipeline.h` + `src/vk_pipeline.cpp` yazıldı: `loadSPIRV`, `createComputePipeline`, `destroyComputePipeline`, `dispatchPipeline` fonksiyonları
+- `ComputePipeline` struct: descriptor set layout, pipeline layout, compute pipeline tek çatı altında
+- `dispatchPipeline`: geçici descriptor pool/set oluşturma, buffer bağlama, command buffer kaydetme, submit + wait döngüsü
+- `relu.comp` → `relu.spv` SPIR-V derleme pipeline'ı CMake'e entegre edildi (`glslangValidator` fallback desteği eklendi)
+- `tests/test_relu.cpp` güncellendi: CPU referans + gerçek GPU dispatch + sonuç karşılaştırması
+- `ctest` 3/3 test geçti (test_relu, test_matmul, test_buffer)
+
+**Plana göre durumum:**
+- Haftanın tüm hedeflerine ulaşıldı, hafta kapatıldı ✅
+- Not: Vize sınavı nedeniyle hafta 2 bitti sonrası ~2 hafta ara verildi; plan tarihleri kaydırıldı.
+
+**Karşılaştığım sorunlar / zorluklar:**
+- `glslc` sistemde yüklü değil, `glslangValidator` ile çözüldü (CMake fallback eklendi)
+
+**Gelecek hafta hedefim:**
+- Tiled GEMM compute shader, workgroup optimizasyonu, `test_matmul` GPU dispatch testi
 
 ---
 

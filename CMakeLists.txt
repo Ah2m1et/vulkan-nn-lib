@@ -17,15 +17,8 @@ if(NOT Vulkan_FOUND)
 endif()
 
 # ------------------------------------------------------------
-# Shader compilation (glslc)
+# Shader compilation (handled inside shaders/CMakeLists.txt)
 # ------------------------------------------------------------
-if(Vulkan_FOUND)
-    find_program(GLSLC glslc HINTS $ENV{VULKAN_SDK}/bin)
-    if(NOT GLSLC)
-        message(WARNING "glslc not found — shaders will not be compiled to SPIR-V.")
-    endif()
-endif()
-
 add_subdirectory(shaders)
 
 # ------------------------------------------------------------
@@ -34,6 +27,7 @@ add_subdirectory(shaders)
 set(LIB_SOURCES
     src/vk_context.cpp
     src/vk_buffer.cpp
+    src/vk_pipeline.cpp
     src/inference.cpp
 )
 
@@ -58,6 +52,8 @@ enable_testing()
 
 add_executable(test_relu tests/test_relu.cpp)
 target_link_libraries(test_relu PRIVATE vulkan_nn)
+target_compile_definitions(test_relu PRIVATE
+    SHADER_DIR="${CMAKE_BINARY_DIR}/shaders")
 add_test(NAME test_relu COMMAND test_relu)
 
 add_executable(test_matmul tests/test_matmul.cpp)
