@@ -19,7 +19,7 @@
 | 1  | 07.04 - 13.04 | Proje dizini, GitHub reposu, geliştirme ortamı kurulumu, CMake yapılandırması | %10 | ✅ Tamamlandı |
 | 2  | 14.04 - 20.04 | Vulkan context kurulumu (VkInstance, VkDevice, compute queue), GPU buffer yönetimi | %20 | ✅ Tamamlandı |
 | 3  | 28.04 - 03.05 | İlk compute shader (ReLU), SPIR-V derleme pipeline'ı, shader test altyapısı | %30 | ✅ Tamamlandı |
-| 4  | 05.05 - 11.05 | Tiled matrix multiplication (GEMM) shader, workgroup optimizasyonu | %42 | ⬜ Başlamadı |
+| 4  | 05.05 - 11.05 | Tiled matrix multiplication (GEMM) shader, workgroup optimizasyonu | %42 | ✅ Tamamlandı |
 | 5  | 12.05 - 18.05 | CPU baseline implementasyonu, ilk CPU vs GPU benchmark ölçümleri | %54 | ⬜ Başlamadı |
 | 6  | 19.05 - 25.05 | ECS mimarisiyle katman yönetimi, VulkanMLP sınıfı iskelet kodu | %64 | ⬜ Başlamadı |
 | 7  | 26.05 - 01.06 | MNIST ağırlıklarını yükleme, 784→128→10 MLP inference pipeline | %75 | ⬜ Başlamadı |
@@ -32,6 +32,29 @@
 ---
 
 ## Haftalık İlerleme Kayıtları
+
+---
+
+### Hafta 4 *(Tarih: 05.05.2025 - 11.05.2025)*
+
+**Plandaki hedef:**
+- Tiled matrix multiplication (GEMM) shader, workgroup optimizasyonu, `test_matmul` GPU dispatch testi
+
+**Bu hafta yaptıklarım:**
+- `matmul.comp`: 16×16 tiled GEMM shader (shared memory, push constant M/N/K, sınır kontrolü) — hafta 3'ten devredilen taslak tamamlandı
+- `tests/test_matmul.cpp` yeniden yazıldı: CPU referans + 3 GPU dispatch testi (2×3×2, 64×64, 17×33×19 non-power-of-2)
+- `shaders/CMakeLists.txt` hata düzeltmesi: `GLSLC_IS_GLSLANG_VALIDATOR` cache kaybolunca `-V` bayrağı düşüyordu; binary adı üzerinden algılama ile sabitlendi
+- `CMakeLists.txt`: `test_matmul`'a `SHADER_DIR` tanımı eklendi
+- `ctest` 3/3 test geçti (test_relu, test_matmul, test_buffer)
+
+**Plana göre durumum:**
+- Haftanın tüm hedeflerine ulaşıldı, hafta kapatıldı ✅
+
+**Karşılaştığım sorunlar / zorluklar:**
+- CMake cache'te `GLSLC=glslangValidator` saklı iken `GLSLC_IS_GLSLANG_VALIDATOR` değişkeni cache'lenmediği için `-V` bayrağı düşüp shader derlenemiyordu; binary adı kontrolüyle çözüldü
+
+**Gelecek hafta hedefim:**
+- CPU baseline GEMM implementasyonu, ilk CPU vs GPU benchmark ölçümleri (chrono + bellek bant genişliği)
 
 ---
 

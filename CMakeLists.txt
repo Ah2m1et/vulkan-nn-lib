@@ -58,6 +58,8 @@ add_test(NAME test_relu COMMAND test_relu)
 
 add_executable(test_matmul tests/test_matmul.cpp)
 target_link_libraries(test_matmul PRIVATE vulkan_nn)
+target_compile_definitions(test_matmul PRIVATE
+    SHADER_DIR="${CMAKE_BINARY_DIR}/shaders")
 add_test(NAME test_matmul COMMAND test_matmul)
 
 add_executable(test_buffer tests/test_buffer.cpp)

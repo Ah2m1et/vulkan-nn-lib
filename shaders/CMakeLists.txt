@@ -8,11 +8,16 @@ if(NOT GLSLC)
     find_program(GLSLC glslangValidator)
     if(GLSLC)
         message(STATUS "glslc not found — using glslangValidator for shader compilation.")
-        set(GLSLC_IS_GLSLANG_VALIDATOR TRUE)
     else()
         message(WARNING "Neither glslc nor glslangValidator found — shaders will not be compiled.")
         return()
     endif()
+endif()
+
+# Detect whether the resolved binary is glslangValidator (needs -V flag for SPIR-V output).
+get_filename_component(_GLSLC_NAME "${GLSLC}" NAME)
+if(_GLSLC_NAME MATCHES "glslangValidator")
+    set(GLSLC_IS_GLSLANG_VALIDATOR TRUE)
 endif()
 
 set(SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR})
