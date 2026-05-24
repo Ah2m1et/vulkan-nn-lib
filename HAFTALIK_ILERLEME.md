@@ -20,7 +20,7 @@
 | 2  | 14.04 - 20.04 | Vulkan context kurulumu (VkInstance, VkDevice, compute queue), GPU buffer yönetimi | %20 | ✅ Tamamlandı |
 | 3  | 28.04 - 03.05 | İlk compute shader (ReLU), SPIR-V derleme pipeline'ı, shader test altyapısı | %30 | ✅ Tamamlandı |
 | 4  | 05.05 - 11.05 | Tiled matrix multiplication (GEMM) shader, workgroup optimizasyonu | %42 | ✅ Tamamlandı |
-| 5  | 12.05 - 18.05 | CPU baseline implementasyonu, ilk CPU vs GPU benchmark ölçümleri | %54 | ⬜ Başlamadı |
+| 5  | 12.05 - 18.05 | CPU baseline implementasyonu, ilk CPU vs GPU benchmark ölçümleri | %54 | ✅ Tamamlandı |
 | 6  | 19.05 - 25.05 | ECS mimarisiyle katman yönetimi, VulkanMLP sınıfı iskelet kodu | %64 | ⬜ Başlamadı |
 | 7  | 26.05 - 01.06 | MNIST ağırlıklarını yükleme, 784→128→10 MLP inference pipeline | %75 | ⬜ Başlamadı |
 | 8  | 02.06 - 08.06 | Command buffer önceden kaydetme optimizasyonu, inference hız testleri | %84 | ⬜ Başlamadı |
@@ -32,6 +32,40 @@
 ---
 
 ## Haftalık İlerleme Kayıtları
+
+---
+
+### Hafta 5 *(Tarih: 12.05.2025 - 24.05.2025)*
+
+**Plandaki hedef:**
+- CPU baseline GEMM implementasyonu, ilk CPU vs GPU benchmark ölçümleri (chrono + bellek transferi dahil toplam süre)
+
+**Bu hafta yaptıklarım:**
+- `benchmark/bench_cpu_vs_gpu.cpp` tamamlandı: GPU TODO bloğu gerçek dispatch ile dolduruldu
+  - CPU: saf üçlü döngü (optimizasyon yok), 5 tekrar ortalaması
+  - GPU: upload + tiled GEMM dispatch + download toplam duvar saati süresi, 1 warm-up + 5 ölçüm
+  - 3 matris boyutu test edildi: 128, 256, 512
+- `CMakeLists.txt`: `bench_cpu_vs_gpu` hedefine `SHADER_DIR` tanımı eklendi (matmul.spv yolu)
+- `ctest` 3/3 test hâlâ geçti (test_relu, test_matmul, test_buffer)
+
+**Benchmark sonuçları (Release build, `bench_cpu_vs_gpu`):**
+
+| Boyut | CPU ort (ms) | GPU ort (ms) | Hızlanma |
+|-------|-------------|-------------|---------|
+| 128×128 | 3.290 | 1.023 | 3.22× |
+| 256×256 | 19.661 | 2.360 | 8.33× |
+| 512×512 | 206.276 | 18.483 | 11.16× |
+
+GPU süresi upload + dispatch + download'ı kapsar; matris büyüdükçe hızlanma oranı artar (compute süresi bellek transfer maliyetini bastırıyor).
+
+**Plana göre durumum:**
+- Hafta 5 hedeflerine ulaşıldı; not: hafta 1 hafta gecikmeli tamamlandı (24.05.2025) ⚠️
+
+**Karşılaştığım sorunlar / zorluklar:**
+- Gecikmeden dolayı sorun yaşanmadı; mevcut altyapı (VkContext, GpuBuffer, dispatchPipeline) benchmark için yeterliydi
+
+**Gelecek hafta hedefim:**
+- ECS mimarisiyle katman yönetimi, VulkanMLP sınıfı iskelet kodu
 
 ---
 

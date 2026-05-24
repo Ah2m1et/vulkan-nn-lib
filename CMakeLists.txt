@@ -71,3 +71,5 @@ add_test(NAME test_buffer COMMAND test_buffer)
 # ------------------------------------------------------------
 add_executable(bench_cpu_vs_gpu benchmark/bench_cpu_vs_gpu.cpp)
 target_link_libraries(bench_cpu_vs_gpu PRIVATE vulkan_nn)
+target_compile_definitions(bench_cpu_vs_gpu PRIVATE
+    SHADER_DIR="${CMAKE_BINARY_DIR}/shaders")
