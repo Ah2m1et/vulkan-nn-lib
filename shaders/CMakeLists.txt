@@ -26,6 +26,7 @@ set(SPV_DIR    ${CMAKE_CURRENT_BINARY_DIR})
 set(SHADERS
     relu.comp
     matmul.comp
+    fc_layer.comp
 )
 
 set(SPV_OUTPUTS)

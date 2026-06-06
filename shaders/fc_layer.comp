@@ -1,0 +1,32 @@
+#version 450
+
+// Fully-connected layer: out[i] = act(dot(W[i,:], in) + bias[i])
+// Binding layout (set = 0):
+//   0 — input   : inSize  floats
+//   1 — weights : outSize * inSize floats, row-major (W[i*inSize + j])
+//   2 — bias    : outSize floats
+//   3 — output  : outSize floats
+
+layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+
+layout(set = 0, binding = 0) readonly  buffer InBuf   { float data[]; } inBuf;
+layout(set = 0, binding = 1) readonly  buffer WBuf    { float data[]; } W;
+layout(set = 0, binding = 2) readonly  buffer BiasBuf { float data[]; } biasBuf;
+layout(set = 0, binding = 3) writeonly buffer OutBuf  { float data[]; } outBuf;
+
+layout(push_constant) uniform PC {
+    uint inSize;
+    uint outSize;
+    uint useReLU;
+} pc;
+
+void main() {
+    uint i = gl_GlobalInvocationID.x;
+    if (i >= pc.outSize) return;
+
+    float acc = biasBuf.data[i];
+    for (uint j = 0; j < pc.inSize; ++j)
+        acc += W.data[i * pc.inSize + j] * inBuf.data[j];
+
+    outBuf.data[i] = (pc.useReLU != 0u) ? max(0.0, acc) : acc;
+}
