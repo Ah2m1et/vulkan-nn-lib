@@ -66,10 +66,26 @@ add_executable(test_buffer tests/test_buffer.cpp)
 target_link_libraries(test_buffer PRIVATE vulkan_nn)
 add_test(NAME test_buffer COMMAND test_buffer)
 
+add_executable(test_mlp tests/test_mlp.cpp)
+target_link_libraries(test_mlp PRIVATE vulkan_nn)
+target_compile_definitions(test_mlp PRIVATE
+    SHADER_DIR="${CMAKE_BINARY_DIR}/shaders")
+add_test(NAME test_mlp COMMAND test_mlp)
+
 # ------------------------------------------------------------
 # Benchmark
 # ------------------------------------------------------------
 add_executable(bench_cpu_vs_gpu benchmark/bench_cpu_vs_gpu.cpp)
 target_link_libraries(bench_cpu_vs_gpu PRIVATE vulkan_nn)
 target_compile_definitions(bench_cpu_vs_gpu PRIVATE
+    SHADER_DIR="${CMAKE_BINARY_DIR}/shaders")
+
+add_executable(bench_inference benchmark/bench_inference.cpp)
+target_link_libraries(bench_inference PRIVATE vulkan_nn)
+target_compile_definitions(bench_inference PRIVATE
+    SHADER_DIR="${CMAKE_BINARY_DIR}/shaders")
+
+add_executable(bench_platform benchmark/bench_platform.cpp)
+target_link_libraries(bench_platform PRIVATE vulkan_nn)
+target_compile_definitions(bench_platform PRIVATE
     SHADER_DIR="${CMAKE_BINARY_DIR}/shaders")

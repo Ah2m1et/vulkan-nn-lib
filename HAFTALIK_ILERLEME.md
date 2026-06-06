@@ -21,10 +21,10 @@
 | 3  | 28.04 - 03.05 | İlk compute shader (ReLU), SPIR-V derleme pipeline'ı, shader test altyapısı | %30 | ✅ Tamamlandı |
 | 4  | 05.05 - 11.05 | Tiled matrix multiplication (GEMM) shader, workgroup optimizasyonu | %42 | ✅ Tamamlandı |
 | 5  | 12.05 - 18.05 | CPU baseline implementasyonu, ilk CPU vs GPU benchmark ölçümleri | %54 | ✅ Tamamlandı |
-| 6  | 19.05 - 25.05 | ECS mimarisiyle katman yönetimi, VulkanMLP sınıfı iskelet kodu | %64 | ⬜ Başlamadı |
-| 7  | 26.05 - 01.06 | MNIST ağırlıklarını yükleme, 784→128→10 MLP inference pipeline | %75 | ⬜ Başlamadı |
-| 8  | 02.06 - 08.06 | Command buffer önceden kaydetme optimizasyonu, inference hız testleri | %84 | ⬜ Başlamadı |
-| 9  | 09.06 - 15.06 | Platform bağımsızlık testi (farklı Vulkan cihazda çalıştırma), benchmark tablosu | %92 | ⬜ Başlamadı |
+| 6  | 19.05 - 25.05 | ECS mimarisiyle katman yönetimi, VulkanMLP sınıfı iskelet kodu | %64 | ✅ Tamamlandı |
+| 7  | 26.05 - 01.06 | MNIST ağırlık yükleme, 784→128→10 MLP inference pipeline | %75 | ✅ Tamamlandı |
+| 8  | 02.06 - 08.06 | Command buffer önceden kaydetme optimizasyonu, inference hız testleri | %84 | ✅ Tamamlandı |
+| 9  | 09.06 - 15.06 | Platform bağımsızlık testi (farklı Vulkan cihazda çalıştırma), benchmark tablosu | %92 | ✅ Tamamlandı |
 | 10 | 16.06 - 22.06 | Kod temizliği, dokümantasyon, final rapor, GitHub release | %100 | ⬜ Başlamadı |
 
 **Durum simgeleri:** ⬜ Başlamadı | 🔄 Devam Ediyor | ✅ Tamamlandı | ⚠️ Gecikti
@@ -65,7 +65,111 @@ GPU süresi upload + dispatch + download'ı kapsar; matris büyüdükçe hızlan
 - Gecikmeden dolayı sorun yaşanmadı; mevcut altyapı (VkContext, GpuBuffer, dispatchPipeline) benchmark için yeterliydi
 
 **Gelecek hafta hedefim:**
-- ECS mimarisiyle katman yönetimi, VulkanMLP sınıfı iskelet kodu
+- Platform bağımsızlık testi (farklı Vulkan cihazda çalıştırma), benchmark tablosu
+
+---
+
+### Hafta 8 *(Tarih: 06.06.2026)*
+
+**Plandaki hedef:**
+- Command buffer önceden kaydetme (pre-record) optimizasyonu, inference hız testleri
+
+**Bu hafta yaptıklarım:**
+- `VulkanMLP::buildCommandBuffer()` (private, lazy): tüm katmanları tek bir reusable command buffer'a kaydeder
+  - Her katman için persistent descriptor pool + descriptor set tahsis edildi
+  - Katmanlar arası `VkBufferMemoryBarrier` (compute→compute, SHADER_WRITE→SHADER_READ)
+  - `ONE_TIME_SUBMIT` yerine sıfır-flag; buffer N kez submit edilebilir
+- `VulkanMLP::forward()` güncellendi: `addLayer()` sonrası `prepared_=false` → ilk `forward()` `buildCommandBuffer()` tetikler; sonraki çağrılarda yalnızca upload + single `vkQueueSubmit` + wait + download
+- `loadWeights()` pre-record'u geçersiz **kılmıyor**: buffer handle değişmediği için mevcut cmd geçerli
+- `benchmark/bench_inference.cpp` yazıldı: 784→128→10, 1000 tekrar
+
+**Benchmark sonuçları (Release build, `bench_inference`):**
+
+| Ölçüm | Süre |
+|-------|------|
+| İlk çağrı (buildCommandBuffer dahil) | 1.711 ms |
+| 1000 tekrar toplam | 826.58 ms |
+| Tekrar başına | 0.827 ms |
+| Throughput | 1209 inf/sec |
+
+Naif yaklaşımda her `forward()` çağrısı için N katman × (descriptor pool oluştur + cmd alloc + kayıt + submit + bekleme + temizlik) yapılırdı. Pre-record ile sadece tek bir submit + wait var; kayıt maliyeti sıfıra iner.
+
+**Plana göre durumum:**
+- Haftanın tüm hedeflerine ulaşıldı ✅
+
+**Karşılaştığım sorunlar / zorluklar:**
+- Yok
+
+**Gelecek hafta hedefim:**
+- Kod temizliği, dokümantasyon, final rapor, GitHub release
+
+---
+
+### Hafta 9 *(Tarih: 06.06.2026)*
+
+**Plandaki hedef:**
+- Platform bağımsızlık testi (farklı Vulkan cihazda çalıştırma), benchmark tablosu
+
+**Bu hafta yaptıklarım:**
+- `src/vk_context.h/cpp` genişletildi:
+  - `DeviceInfo` struct: cihaz adı, tipi, Vulkan API versiyonu
+  - `enumerateDevices()`: compute queue'su olan tüm fiziksel cihazları listeler
+  - `createContextForDevice(uint32_t index)`: belirtilen cihazı seçerek context oluşturur
+  - `createContext()` → `createContextForDevice(0)` wrapper'ına dönüştürüldü (geriye dönük uyumlu)
+- `benchmark/bench_platform.cpp` yazıldı: tüm cihazları enumerate et, her birinde iki ağ boyutunda benchmark yap, tablo yazdır
+- `ctest` 4/4 test hâlâ geçiyor
+
+**Benchmark tablosu (Release build, `bench_platform`):**
+
+| Cihaz | Tip | Ağ | 1. çağrı (ms) | Tekrar başına (ms) | inf/sec |
+|-------|-----|-----|---------------|-------------------|---------|
+| Intel(R) Graphics (RPL-U) | Integrated GPU | 784→128→10 | 1.813 | 1.083 | 923 |
+| llvmpipe (LLVM 15.0.7) | CPU | 784→128→10 | 21.334 | 0.660 | 1515 |
+| Intel(R) Graphics (RPL-U) | Integrated GPU | 784→512→256→10 | 2.442 | 1.675 | 597 |
+| llvmpipe (LLVM 15.0.7) | CPU | 784→512→256→10 | 2.561 | 1.111 | 899 |
+
+**Gözlem:** Küçük ağda (784→128→10) CPU software renderer (llvmpipe) iGPU'yu geçiyor. Bunun nedeni: upload + submit + wait overhead'i küçük ağ compute süresini bastırıyor. Büyük ağda (784→512→256→10) fark kapanıyor. Platform bağımsızlık hedefi başarıyla doğrulandı: aynı kod, farklı Vulkan backend'lerinde çalışıyor.
+
+**Plana göre durumum:**
+- Haftanın tüm hedeflerine ulaşıldı ✅
+
+**Karşılaştığım sorunlar / zorluklar:**
+- Yok
+
+**Gelecek hafta hedefim:**
+- Kod temizliği, dokümantasyon, final rapor, GitHub release
+
+---
+
+### Hafta 6 + 7 *(Tarih: 02.06.2026 - 06.06.2026 — gecikme telafisi)*
+
+**Plandaki hedef:**
+- Hafta 6: VulkanMLP katman yönetimi, `addLayer()` altyapısı
+- Hafta 7: Ağırlık yükleme (`loadWeights`), `forward()` GPU dispatch zinciri
+
+**Bu hafta yaptıklarım:**
+- `shaders/fc_layer.comp` yazıldı: GEMV + bias + opsiyonel ReLU shader
+  - 4 binding (input, weights, bias, output), push constant `{inSize, outSize, useReLU}`
+  - `local_size_x = 64`; her invocation bir çıkış nöronunu hesaplıyor
+- `src/inference.h` yeniden tasarlandı: `Layer` struct (inSize, outSize, ComputePipeline, 3× GpuBuffer), `loadWeights()` API
+- `src/inference.cpp` tam implementasyon:
+  - `addLayer()`: fc_layer.spv'den pipeline yarat, weight/bias/output bufferları tahsis et, sıfırla
+  - `loadWeights(idx, weights, biases)`: GPU buffer'lara upload et
+  - `forward(input)`: inputBuf'a yükle → her katman için `dispatchPipeline` → son katmandan download
+  - Son katmanda ReLU yok, aradakilerde var
+- `tests/test_mlp.cpp`: 4→3→2 ağ, CPU referans + GPU karşılaştırma (hata toleransı 1e-4)
+- `shaders/CMakeLists.txt` ve `CMakeLists.txt` güncellendi (`test_mlp` hedefi eklendi)
+- `ctest` 4/4 test geçti (test_relu, test_matmul, test_buffer, test_mlp)
+
+**Plana göre durumum:**
+- Hafta 6+7 birlikte kapatıldı (2 hafta gecikme telafisi) ✅ ⚠️
+
+**Karşılaştığım sorunlar / zorluklar:**
+- `VulkanMLP` destructor'ı `destroyContext` çağrısından sonra çalışıyordu (dangling device handle); test'te scope ile çözüldü
+- Hafta 6+7 gecikmeli tamamlandı (06.06.2026)
+
+**Gelecek hafta hedefim:**
+- Command buffer önceden kaydetme (pre-record) optimizasyonu, inference hız testleri
 
 ---
 

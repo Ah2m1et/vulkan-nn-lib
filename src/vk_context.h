@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 // Abort on any Vulkan error
 #define VK_CHECK(call)                                                  \
@@ -20,11 +21,24 @@ struct VkContext {
     VkPhysicalDevice physDevice       = VK_NULL_HANDLE;
     VkDevice         device           = VK_NULL_HANDLE;
     VkQueue          computeQueue     = VK_NULL_HANDLE;
-    VkCommandPool    commandPool      = VK_NULL_HANDLE; // for compute dispatches
+    VkCommandPool    commandPool      = VK_NULL_HANDLE;
     uint32_t         computeFamilyIdx = UINT32_MAX;
 };
 
-// Create a minimal Vulkan context with a compute queue.
+struct DeviceInfo {
+    uint32_t    index;      // index into vkEnumeratePhysicalDevices list
+    std::string name;
+    std::string typeName;   // "Discrete GPU", "Integrated GPU", "CPU", "Virtual GPU", "Other"
+    uint32_t    apiVersion;
+};
+
+// Return info for every physical device that has a compute queue.
+std::vector<DeviceInfo> enumerateDevices();
+
+// Create a context using the device at the given physical-device index.
+VkContext createContextForDevice(uint32_t deviceIndex);
+
+// Convenience: create a context using the first available device.
 VkContext createContext();
 
 // Destroy all Vulkan objects held by the context.
