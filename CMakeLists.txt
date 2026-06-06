@@ -5,6 +5,17 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ------------------------------------------------------------
+# EnTT  (header-only ECS library)
+# ------------------------------------------------------------
+include(FetchContent)
+FetchContent_Declare(
+    entt
+    GIT_REPOSITORY https://github.com/skypjack/entt.git
+    GIT_TAG        v3.13.2
+)
+FetchContent_MakeAvailable(entt)
+
+# ------------------------------------------------------------
 # Vulkan
 # ------------------------------------------------------------
 find_package(Vulkan QUIET)
@@ -33,6 +44,7 @@ set(LIB_SOURCES
 
 add_library(vulkan_nn STATIC ${LIB_SOURCES})
 target_include_directories(vulkan_nn PUBLIC src)
+target_link_libraries(vulkan_nn PUBLIC EnTT::EnTT)
 
 if(Vulkan_FOUND)
     target_link_libraries(vulkan_nn PUBLIC Vulkan::Vulkan)
