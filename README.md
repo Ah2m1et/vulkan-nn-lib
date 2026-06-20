@@ -22,12 +22,10 @@ sudo apt install cmake libvulkan-dev vulkan-tools mesa-vulkan-drivers glslang-to
 ```
 
 > **Raspberry Pi 5 notu:**
-> VideoCore VII, Vulkan 1.3 destekler. Mesa 23.1+ ile tam compute shader desteği
-> gelir. Kernel 6.1+ ve `firmware-misc-nonfree` paketi gereklidir.
-> ```bash
-> sudo apt install firmware-misc-nonfree
-> sudo rpi-update   # isteğe bağlı, güncel firmware için
-> ```
+> VideoCore VII GPU, Mesa V3DV sürücüsüyle Vulkan compute destekler (Mesa 23.1+).
+> Sürücü **64-bit (arm64) Raspberry Pi OS Bookworm** ile `mesa-vulkan-drivers`
+> paketinden gelir; ayrı firmware kurulumu gerekmez. Detaylı kurulum ve test
+> adımları için bkz. [RASPBERRY_PI_TEST.md](RASPBERRY_PI_TEST.md).
 
 ### LunarG Vulkan SDK (alternatif)
 
