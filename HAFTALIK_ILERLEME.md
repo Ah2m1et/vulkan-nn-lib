@@ -25,13 +25,40 @@
 | 7  | 26.05 - 01.06 | MNIST ağırlık yükleme, 784→128→10 MLP inference pipeline | %75 | ✅ Tamamlandı |
 | 8  | 02.06 - 08.06 | Command buffer önceden kaydetme optimizasyonu, inference hız testleri | %84 | ✅ Tamamlandı |
 | 9  | 09.06 - 15.06 | Platform bağımsızlık testi (farklı Vulkan cihazda çalıştırma), benchmark tablosu | %92 | ✅ Tamamlandı |
-| 10 | 16.06 - 22.06 | Kod temizliği, dokümantasyon, final rapor, GitHub release | %100 | ⬜ Başlamadı |
+| 10 | 16.06 - 22.06 | Kod temizliği, dokümantasyon, final rapor, GitHub release + **RPi 5 (VideoCore VII) gerçek donanım testi** | %100 | 🔄 Devam Ediyor |
 
 **Durum simgeleri:** ⬜ Başlamadı | 🔄 Devam Ediyor | ✅ Tamamlandı | ⚠️ Gecikti
 
 ---
 
 ## Haftalık İlerleme Kayıtları
+
+---
+
+### Hafta 10 *(Tarih: 16.06.2026 - 22.06.2026)*
+
+**Plandaki hedef:**
+- Kod temizliği, dokümantasyon, final rapor, GitHub release
+- **Asıl kritik çıktı:** Projenin "platform bağımsız GPGPU kütüphanesi" iddiasını gerçek hedef donanımda — Raspberry Pi 5 / VideoCore VII GPU (Mesa V3DV sürücüsü) — doğrulamak. Hafta 9 testi yalnızca masaüstündeydi (Intel iGPU + llvmpipe).
+
+**Bu hafta yaptıklarım:**
+- **RPi 5 gerçek donanım koşumu tamamlandı (2026-06-19).** Detaylı kurulum + sonuçlar `RASPBERRY_PI_TEST.md` §6'da.
+  - Ortam: **V3D 7.1.10.2** (Integrated GPU), Vulkan **1.3.318**, Mesa **25.2.8**, Broadcom (0x14e4); Ubuntu 24.04.4 LTS, kernel `6.8.0-1057-raspi`, aarch64
+  - Kütüphane değişiklik yapılmadan derlendi; **`ctest` 4/4 test geçti** (test_buffer, test_relu, test_matmul, test_mlp) → aynı SPIR-V/kod farklı Vulkan backend'inde sorunsuz çalışıyor. Bu, `maxComputeWorkGroupInvocations ≥ 256` olduğunu da kanıtlar (matmul TILE=16 dokunulmadan çalıştı).
+  - Üç benchmark da hatasız sayı üretti (`bench_cpu_vs_gpu`, `bench_inference`, `bench_platform`).
+- **Bilimsel bulgu (dürüst çerçeve):** Yoğun GEMM'de V3D (GPU) naif tek-thread CPU'yu **5–11×** geçti; ancak gerçek MLP inference'ta vektörize **llvmpipe (CPU) her iki ağ boyutunda da V3D'yi geçti**. Sebep: küçük tek-örnek inference'ta katman başına dispatch/submit overhead'i GPU'da baskın. Yani kazanç iş yükü tipine bağlı — bu bir zayıflık değil, özgün ve dürüst bir bulgu. Batch'leme / dispatch birleştirme net bir **gelecek çalışma** yönü.
+- Termal: koşum boyunca 52.7 → 58.2 °C, throttle **yok** (aktif soğutma + güç yeterli).
+
+**Plana göre durumum:**
+- En kritik çıktı (gerçek ARM/VideoCore donanımında platform bağımsızlık) ✅ doğrulandı.
+- Hafta içindeyiz (🔄): kod temizliği, final rapor ve GitHub release adımları sürüyor.
+
+**Karşılaştığım sorunlar / zorluklar:**
+- Rehber Raspberry Pi OS Bookworm varsayıyordu; test Ubuntu 24.04 (Mesa 25.2.8) üzerinde yapıldı. V3DV her iki dağıtımda da `mesa-vulkan-drivers` ile gelir, sonuç değişmedi. Ubuntu'da `noble-updates` deposu eksikliğinden `bzip2`/`libbz2` bağımlılık çakışması yaşandı, depo eklenince çözüldü.
+- **Enerji ölçümü tamamlandı (2026-06-20, `vcgencmd pmic_read_adc`):** Boşta **2.10 W**, MLP inference yükünde **2.56 W**, yoğun GEMM yükünde **3.47 W**. Tüm kart yük altında bile < 3.5 W çekti → "düşük güçlü / enerji verimli platform" iddiası artık ölçümle destekleniyor. Çıkarım başına enerji ≈ **1.74 mJ** (toplam board) / **0.31 mJ** (dinamik), 1468 inf/sec. Sıcaklık 48.3 → 56.5 °C, throttle yok. Detay + yöntem notu `RASPBERRY_PI_TEST.md` §6'da. Not: tez özeti/2209-A'daki "enerji verimliliği" ifadesi artık sayıyla karşılanıyor.
+
+**Gelecek hafta hedefim:**
+- (Final hafta) Final rapor + GitHub release; karar verilirse RPi 5'te watt ölçümü ekleme.
 
 ---
 

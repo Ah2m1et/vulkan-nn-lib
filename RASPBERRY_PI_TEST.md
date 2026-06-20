@@ -212,6 +212,31 @@ Bu, `maxComputeWorkGroupInvocations` ≥ 256 olduğunu da kanıtlar (matmul TILE
 > baskın. Yani kazanç iş yüküne bağlı — büyük yoğun matmul'da GPU, küçük seri
 > inference'ta CPU yolu avantajlı. Batch'leme / dispatch birleştirme net bir gelecek-çalışma yönü.
 
+**Enerji ölçümü (`vcgencmd pmic_read_adc`, dahili PMIC — board gücü = Σ rail V×I):**
+
+| Durum | Board gücü (W) | Dinamik (boşta üstü) |
+|-------|---------------|----------------------|
+| Boşta (idle) | **2.10** | — |
+| MLP inference yükü (784→128→10) | **2.56** | +0.46 W |
+| Yoğun GEMM yükü (128/256/512) | **3.47** | +1.37 W |
+
+| Çıkarım başına enerji | Değer |
+|-----------------------|-------|
+| Throughput | 1468 inf/sec |
+| Enerji/çıkarım (toplam board) | **≈ 1.74 mJ** |
+| Enerji/çıkarım (dinamik, boşta düşülmüş) | **≈ 0.31 mJ** |
+
+Sıcaklık ölçüm boyunca 48.3 → 56.5 °C, **throttle yok**. Tüm kart yük altında bile
+**< 3.5 W** çekti — bu, "düşük güçlü / enerji verimli platform" iddiasını ölçümle destekler.
+
+> **Yöntem notu (dürüstlük):** Güç, yük altında 20 sn boyunca PMIC'ten ~0.2 sn aralıkla
+> örneklenip ortalandı; boşta değer aynı şekilde 10 sn ölçüldü. Inference yük değeri
+> **muhafazakârdır (gerçeğin altında)**: sürdürülebilir yük için benchmark süreç döngüsünde
+> tekrar tekrar başlatıldığından duvar-saati süresinin önemli kısmı Vulkan init/teardown'a
+> gidiyor ve aktif compute gücünü seyreltiyor. Sürekli GPU compute'un baskın olduğu GEMM
+> döngüsü (+1.37 W) gerçek yük çekişini daha iyi temsil eder. Sayılar tek koşumdur;
+> mutlak watt ölçüm yöntemine (PMIC vs. inline USB-C güç ölçer) göre ±%10 oynayabilir.
+
 ---
 
 ## 7. Olası Sorunlar ve Çözümler
