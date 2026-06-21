@@ -4,6 +4,26 @@ project(vulkan-nn-lib LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Benchmark'ların adil olması için varsayılan optimizasyon seviyesi Release.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+    message(STATUS "CMAKE_BUILD_TYPE belirtilmedi — Release kullaniliyor.")
+endif()
+
+# ------------------------------------------------------------
+# OpenBLAS (opsiyonel) — adil CPU kıyas tabanı (cblas_sgemm)
+# ------------------------------------------------------------
+find_library(OPENBLAS_LIB NAMES openblas)
+find_path(OPENBLAS_INC NAMES cblas.h PATH_SUFFIXES openblas)
+if(OPENBLAS_LIB AND OPENBLAS_INC)
+    message(STATUS "OpenBLAS bulundu: ${OPENBLAS_LIB} (adil CPU baseline etkin)")
+    set(HAVE_OPENBLAS TRUE)
+else()
+    message(STATUS "OpenBLAS bulunamadi — bench_cpu_vs_gpu yalnizca naif+cok-thread CPU ile kiyaslar. Kurmak icin: sudo apt install libopenblas-dev")
+endif()
+
+find_package(Threads REQUIRED)
+
 # ------------------------------------------------------------
 # EnTT  (header-only ECS library)
 # ------------------------------------------------------------
@@ -88,9 +108,14 @@ add_test(NAME test_mlp COMMAND test_mlp)
 # Benchmark
 # ------------------------------------------------------------
 add_executable(bench_cpu_vs_gpu benchmark/bench_cpu_vs_gpu.cpp)
-target_link_libraries(bench_cpu_vs_gpu PRIVATE vulkan_nn)
+target_link_libraries(bench_cpu_vs_gpu PRIVATE vulkan_nn Threads::Threads)
 target_compile_definitions(bench_cpu_vs_gpu PRIVATE
     SHADER_DIR="${CMAKE_BINARY_DIR}/shaders")
+if(HAVE_OPENBLAS)
+    target_compile_definitions(bench_cpu_vs_gpu PRIVATE HAVE_OPENBLAS)
+    target_include_directories(bench_cpu_vs_gpu PRIVATE ${OPENBLAS_INC})
+    target_link_libraries(bench_cpu_vs_gpu PRIVATE ${OPENBLAS_LIB})
+endif()
 
 add_executable(bench_inference benchmark/bench_inference.cpp)
 target_link_libraries(bench_inference PRIVATE vulkan_nn)
@@ -101,3 +126,16 @@ add_executable(bench_platform benchmark/bench_platform.cpp)
 target_link_libraries(bench_platform PRIVATE vulkan_nn)
 target_compile_definitions(bench_platform PRIVATE
     SHADER_DIR="${CMAKE_BINARY_DIR}/shaders")
+
+# DOP (veri temelli programlama) etkisi: SoA vs AoS bellek düzeni — madde #1
+add_executable(bench_soa_vs_aos benchmark/bench_soa_vs_aos.cpp)
+target_link_libraries(bench_soa_vs_aos PRIVATE Threads::Threads)
+
+# ------------------------------------------------------------
+# Örnek: MNIST uçtan uca doğruluk (madde #2)
+# ------------------------------------------------------------
+add_executable(mnist_infer examples/mnist_infer.cpp)
+target_link_libraries(mnist_infer PRIVATE vulkan_nn)
+target_compile_definitions(mnist_infer PRIVATE
+    SHADER_DIR="${CMAKE_BINARY_DIR}/shaders"
+    MODELS_DIR="${CMAKE_SOURCE_DIR}/models")

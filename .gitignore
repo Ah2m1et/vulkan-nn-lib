@@ -2,5 +2,6 @@ build*/
 *.spv
 *.o
 models/*.bin
+models/mnist_raw/
 .vscode/
 __pycache__/
